@@ -20,7 +20,7 @@
                 <span class="right">{{time}}</span>
                 <span class="iconfont icon-Right"></span>
             </li>
-            <li @click="curPage = demoPickerConfig.pageName">
+            <li @click="goPage(demoPickerConfig.pageName, true)">
                 <span class="left">选人</span>
                 <span class="right">{{name}}</span>
                 <span class="iconfont icon-Right"></span>
@@ -28,7 +28,7 @@
         </ul>
     </sub-page>
 
-    <demo-picker :cur-page="curPage" v-bind="demoPickerConfig"></demo-picker>
+    <demo-picker :cur-page="curPage" v-bind="demoPickerConfig" @cancel="historyBack" @confirm="onConfirmDemo"></demo-picker>
 </vue-app>
 <script src="jquery.min.js"></script>
 <script src="i-jquery.js"></script>
@@ -44,22 +44,22 @@
             promptPage: '',
             time: '',
             name: '',
-            listConfig: {
-                checkedInit: [],
-                itemPreProcess: function (data) {
-                    data.a = "123"
-                },
-                onConfirm: function (added, removed) {
-                    console.log(added, removed);
-                }
-            },
+
             demoPickerConfig: {
-                pageName: "dio",
+                pageName: "dio"
             }
         },
         methods: {
-            toIndex: function () {
-                this.curPage = 'index';
+            goPage: function (pageName, isPrompt) {
+                this.curPage = pageName;
+                history.pushState(null, '', "#" + pageName);
+            },
+            historyBack: function(){
+                history.back();
+            },
+            onConfirmDemo: function(added, removed) {
+                console.log(added, removed);
+                this.historyBack();
             }
         }
     });

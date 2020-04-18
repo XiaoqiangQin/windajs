@@ -669,8 +669,13 @@
 				}
 			}
 		},
+		methods: {
+			onConfirm: function(added, removed){
+				this.$emit("confirm", added, removed);
+			}
+		},
 		template:
-			'<pageable-list v-bind="listConfig" :cur-page="curPage">' +
+			'<pageable-list v-bind="listConfig" :cur-page="curPage" @cancel="$emit(\'cancel\')" @confirm="onConfirm">' +
 			'</pageable-list>'
 	});
 	Vue.component("VueApp", {
@@ -710,42 +715,18 @@
 	 */
 	Vue.directive('PageHash', {
 		bind: function(el, binding, vnode){
-			var hashHistory = [];
-			var lastHash;
+			var popHash;
 			var defaultPage = vnode.data["default-page"] || "index";
-			var curHash = lastHash = getCurHash(defaultPage);
-			vnode.context[binding.expression] = curHash;
-			hashHistory.push(curHash);
-			// console.log(vnode.context.$watch);
-			var dontWatch = false;
-			vnode.context.$watch(binding.expression, function(newVal, oldVal){
-				console.log("page hash watch :", newVal, oldVal, dontWatch);
-				if(dontWatch){
-					dontWatch = false;
-					return;
-				}
-				var historyIndex = indexOf.call(hashHistory, newVal);
-				if(historyIndex >= 0){
-					var backStep = hashHistory.length - (historyIndex + 1);
-					if(backStep > 0){
-						history.go(-backStep);
-					}
-				}else {
-					var hash = "#" + newVal;
-					history.pushState(null, '', hash);
-					hashHistory.push(lastHash = newVal);
-				}
-			});
+			popHash = getCurHash(defaultPage);
+			vnode.context[binding.expression] = popHash;
+			console.log("hash change :", popHash);
+
 			window.onpopstate = function(){
-				var popHash = getCurHash(defaultPage);
-				if(popHash === lastHash){
-					console.log("hash duplicate :", popHash, lastHash);
-					return;
-				}
-				console.log("hash change :", popHash, lastHash);
-				dontWatch = true;
+				popHash = getCurHash(defaultPage);
+
+				console.log("hash change :", popHash);
+
 				vnode.context[binding.expression] = popHash;
-				lastHash = popHash;
 			}
 		}
 	});
