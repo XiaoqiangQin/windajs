@@ -36,6 +36,12 @@ var WindService = {
 var WindRoute = {
 		__goTo: function(url){
 			window.location.href = url;
+		},
+		setHash: function(hash){
+			if(hash.indexOf("#") >= 0){
+				return;
+			}
+			history.pushState(null, null, "#" + hash);
 		}
 };
 __WindPages.allocationDetail = "allocation/orderDetail.html";

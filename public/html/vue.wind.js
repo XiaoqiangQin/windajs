@@ -259,6 +259,38 @@
 			}
 		}
 	}
+	function getByPath(path){
+		var  dir = path.split(".");
+		var v = this;
+		for(var i = 0; i < dir.length; i++){
+			var key = dir[i];
+			v = v[key];
+		}
+		return v;
+	}
+	function setByPath(path, value){
+		var obj = this;
+		var  dir = path.split(".");
+		for(var i = 0; i < dir.length - 1; i++){
+			var key = dir[i];
+			obj = obj[key];
+		}
+		var directKey = dir[dir.length - 1];
+		return obj[directKey] = value;
+	}
+
+	/**
+	 * 获取当前页面不带井号的hash值
+	 * @param defaultHash 如果结果为空将用这个参数代替返回值
+	 * @returns {string}
+	 */
+	function getCurHash(defaultHash){
+		var curHash = location.hash;
+		if(!curHash || "#" === curHash){
+			return defaultHash;
+		}
+		return curHash.substr(1);
+	}
 	Vue.component("SubPage", {
 		props: {
 			curPage: String,
@@ -617,7 +649,10 @@
 			'<pageable-list v-bind="listConfig" :cur-page="curPage">' +
 			'</pageable-list>'
 	});
-	Vue.directive('dateSelect', {
+	/**
+	 * v-date-select:datetime="Var"
+	 */
+	Vue.directive('DateSelect', {
 		bind: function(el, binding, vnode){
 			el.addEventListener('click',function(){
 				var type = binding.arg || "date";
@@ -633,6 +668,32 @@
 					vnode.context[binding.expression] = v;
 				});
 			})
+		}
+	});
+	/**
+	 * v-page-hash="curPage"
+	 * 使用这个这个来代理浏览器的hash变化，用了这个指令就不要再手动管理hash了
+	 */
+	Vue.directive('PageHash', {
+		bind: function(el, binding, vnode){
+			var lastHash;
+			var defaultPage = vnode.data["default-page"] || "index";
+			var curHash = lastHash = getCurHash(defaultPage);
+			if(curHash){
+				vnode.context[binding.expression] = curHash;
+			}
+			// console.log(vnode.context.$watch);
+			vnode.context.$watch(binding.expression, function(newVal, oldVal){
+				console.log("page hash watch :", newVal, oldVal);
+			});
+			window.onpopstate = function(){
+				var popHash = getCurHash(defaultPage);
+				if(popHash === lastHash){
+					return;
+				}
+				vnode.context[binding.expression] = popHash;
+				lastHash = popHash;
+			}
 		}
 	});
 })(Vue, window.WindService, window.IosSelect);

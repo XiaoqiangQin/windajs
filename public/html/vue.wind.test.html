@@ -11,7 +11,7 @@
     <script src="vue.js"></script>
 </head>
 <body>
-<div id="app" v-cloak>
+<div id="app" v-cloak v-page-hash="curPage" :default-page="curPage">
 
     <sub-page :cur-page="curPage" page-name="index">
         <ul class="fh-ul">
@@ -45,6 +45,9 @@
                 onConfirm: function (added, removed) {
                     console.log(added, removed);
                 }
+            },
+            demoPickerConfig: {
+                pageName: "dio",
             }
         },
         methods: {
