@@ -1,5 +1,185 @@
 /*半成品的列表控件*/
-(function(Vue, WindService){
+(function(Vue, WindService, IosSelect){
+	var FastIosSelect = window.FastIosSelect = {};
+	var dateGen = {
+		isLeapYear: function (year) {
+			if(year%400 === 0 || (year%4 === 0 && year%100 !== 0) ) {
+				return true;
+			}
+			else { return false; }
+		},
+		Year: function (callback) {
+			var endYear = new Date().getFullYear() + 50;
+			var arr = [];
+			for (var i = 1996; i <= endYear; i++) {
+				arr.push({
+					id: i + '',
+					value: i + '年'
+				});
+			}
+			if(callback instanceof Function){
+				callback(arr);
+			}
+			return arr;
+		},
+		Month: function (year, callback) {
+			var arr = [];
+			for (var i = 1; i <= 12; i++) {
+				arr.push({
+					id: i + '',
+					value: i + '月'
+				});
+			}
+			if(callback instanceof Function){
+				callback(arr);
+			}
+			return arr;
+		},
+		Date: function () {
+			var year = arguments[0], month = arguments[1], callback = arguments[2];
+			var monthDay = 30;
+			switch(parseInt(month)) {
+				case 1: monthDay = 31; break;
+				case 2:
+					if(this.isLeapYear(year)) { monthDay = 29; }
+					else { monthDay = 28; }
+					break;
+				case 3: monthDay = 31; break;
+				case 4: monthDay = 30; break;
+				case 5: monthDay = 31; break;
+				case 6: monthDay = 30; break;
+				case 7: monthDay = 31; break;
+				case 8: monthDay = 31; break;
+				case 9: monthDay = 30; break;
+				case 10: monthDay = 31; break;
+				case 11: monthDay = 30; break;
+				case 12: monthDay = 31; break;
+			}
+			var arr = [];
+			for (var i = 1; i <= monthDay; i++) {
+				arr.push({
+					id: i + '',
+					value: i + '日'
+				});
+			}
+			if(callback instanceof Function){
+				callback(arr);
+			}
+			return arr;
+		},
+		Hour: function () {
+			var callback = arguments[arguments.length - 1];
+			var arr = [];
+			for (var i = 0; i < 24; i++) {
+				arr.push({
+					id: i + '',
+					value: i + '点'
+				});
+			}
+			if(callback instanceof Function){
+				callback(arr);
+			}
+			return arr;
+		},
+		Minute: function () {
+			var callback = arguments[arguments.length - 1];
+			var arr = [];
+			for (var i = 0; i <= 59; i++) {
+				arr.push({
+					id: i + '',
+					value: i + '分'
+				});
+			}
+			if(callback instanceof Function){
+				callback(arr);
+			}
+			return arr;
+		},
+		Second: function () {
+			var callback = arguments[arguments.length - 1];
+			var arr = [];
+			for (var i = 0; i <= 59; i++) {
+				arr.push({
+					id: i + '',
+					value: i + '秒'
+				});
+			}
+			if(callback instanceof Function){
+				callback(arr);
+			}
+			return arr;
+		},
+		fixZero: function(callbackValue, len){
+			var id = callbackValue && callbackValue.id;
+			if(id === undefined || id === null){
+				return null;
+			}
+			id = "" + id;
+			len -= id.length;
+			for(; len > 0; len--){
+				id = "0" + id;
+			}
+			return id;
+		}
+	}
+
+	if(IosSelect){
+		var levelNames = ["one", "two", "three", "four", "five", "six"];
+		/**
+		 * 选择时间
+		 * @param defaultValue, 初始化的值，格式：YYYY-MM-dd HH:mm:ss，默认为当前时间
+		 * @param callback
+		 */
+		FastIosSelect.date = function(defaultValue, callback){
+			if(!defaultValue){
+				defaultValue = "1996-01-01";
+			}
+			var isTime = defaultValue.indexOf("-") < 0;
+			var selectedSlices = defaultValue.replace(/[-|:|\s]/g, "/").split("/");
+			var data = [dateGen.Year, dateGen.Month, dateGen.Date.bind(dateGen), dateGen.Hour, dateGen.Minute, dateGen.Second];
+			if(isTime){
+				data.splice(0, 3);
+			}
+			var level = selectedSlices.length;
+			data.length = selectedSlices.length;
+			var options = {
+				title: "选择",
+				itemHeight: 35,
+				showLoading: true,
+				callback: function(v1, v2, v3, v4, v5, v6){
+					var v = "";
+					var base = [v1, v2, v3];
+					base.splice(level);
+					if(isTime){
+						for(var i = 0; i < base.length; i++){
+							base[i] = dateGen.fixZero(base[i], 2);
+						}
+						v = base.join(":");
+					}else {
+						base[0] = dateGen.fixZero(base[0], 4);
+						base[1] = dateGen.fixZero(base[1], 2);
+						base[2] = dateGen.fixZero(base[2], 2);
+						v = base.join("-");
+						if(level > 3){
+							var hms = [v4, v5, v6];
+							hms.splice(level - 3);
+							for(var i = 0; i < hms.length; i++){
+								hms[i] = dateGen.fixZero(hms[i], 2);
+							}
+							v += " " + hms.join(":");
+						}
+					}
+					console.log(v);
+					callback(v);
+				}
+			};
+			for(var i = 0; i < level; i++){
+				var levelName = levelNames[i];
+				options[levelName + "LevelId"] = parseInt(selectedSlices[i]);
+			}
+			new IosSelect(level, data, options);
+		}
+	}
 
 	function getScrollEventTarget(element, rootParent) {
 		if(!rootParent){rootParent = window}
@@ -413,4 +593,4 @@
 			'<pageable-list v-bind="listConfig" :cur-page="curPage">' +
 			'</pageable-list>'
 	})
-})(Vue, WindService);
+})(Vue, window.WindService, window.IosSelect);
