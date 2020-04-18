@@ -710,7 +710,7 @@
 		},
 		data: function(){
 			return {
-				defaultPage: this.curPage,
+				defaultPage: this.curPage || "index",
 			}
 		},
 		template:
