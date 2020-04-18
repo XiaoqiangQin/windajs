@@ -678,18 +678,16 @@
 			'<pageable-list v-bind="listConfig" :cur-page="curPage" @cancel="$emit(\'cancel\')" @confirm="onConfirm">' +
 			'</pageable-list>'
 	});
-	Vue.component("VueApp", {
-		template:
-			'<div>' +
-			'	<slot></slot>'+
-			'</div>'
-	});
 	/**
 	 * v-date-select:datetime="Var"
 	 */
 	Vue.directive('DateSelect', {
 		bind: function(el, binding, vnode){
+			console.log(vnode.context);
 			el.addEventListener('click',function(){
+				if(vnode.context.goPage){
+					// vnode.context.goPage(123, true);
+				}
 				var type = binding.arg || "date";
 				var defaultValue;
 				if(type === "datetime"){
@@ -705,30 +703,38 @@
 			})
 		}
 	});
-	/**
-	 * v-page-hash="curPage"
-	 * 使用这个这个来代理浏览器的hash变化，用了这个指令就不要再手动管理hash了
-	 */
-	Vue.directive('PageHash', {
-		bind: function(el, binding, vnode){
+	Vue.component("VueApp", {
+		model: {prop: "curPage", event: "change"},
+		props: {
+			curPage: String,
+		},
+		data: function(){
+			return {
+				defaultPage: this.curPage,
+			}
+		},
+		template:
+			'<div >' +
+			'	<slot></slot>'+
+			'</div>',
+		created: function(){
+			var _this = this;
 			var popHash;
-			var defaultPage = vnode.data["default-page"] || "index";
-			popHash = getCurHash(defaultPage);
-			vnode.context[binding.expression] = popHash;
-			console.log("hash change :", popHash);
-			vnode.context.goPage = function (pageName, isPrompt) {
-				vnode.context[binding.expression] = pageName;
+			popHash = getCurHash(_this.defaultPage);
+			_this.$emit("change", popHash);
+			Vue.prototype.goPage = function (pageName, isPrompt) {
+				if(!isPrompt){
+					_this.$emit("change", pageName);
+				}
 				history.pushState(null, '', "#" + pageName);
 			}
 			window.onpopstate = function(){
-				popHash = getCurHash(defaultPage);
-
-				console.log("hash change :", popHash);
-
-				vnode.context[binding.expression] = popHash;
+				popHash = getCurHash(_this.defaultPage);
+				_this.$emit("change", popHash);
 			}
 		}
 	});
+
 
 	Vue.prototype.historyBack = function(){
 		history.back();
