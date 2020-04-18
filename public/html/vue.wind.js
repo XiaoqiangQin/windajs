@@ -708,10 +708,6 @@
 	/**
 	 * v-page-hash="curPage"
 	 * 使用这个这个来代理浏览器的hash变化，用了这个指令就不要再手动管理hash了
-	 * 要注意curPage的可能的值不要重复
-	 * hashHistory基于一个约定来进行工作：hashHistory中永远不会有重复的值（插入重复值代表后退），每次插入时要将检查是否有重复值
-	 * replaceState
-	 * pushState
 	 */
 	Vue.directive('PageHash', {
 		bind: function(el, binding, vnode){
@@ -720,7 +716,10 @@
 			popHash = getCurHash(defaultPage);
 			vnode.context[binding.expression] = popHash;
 			console.log("hash change :", popHash);
-
+			vnode.context.goPage = function (pageName, isPrompt) {
+				vnode.context[binding.expression] = pageName;
+				history.pushState(null, '', "#" + pageName);
+			}
 			window.onpopstate = function(){
 				popHash = getCurHash(defaultPage);
 
@@ -730,4 +729,8 @@
 			}
 		}
 	});
+
+	Vue.prototype.historyBack = function(){
+		history.back();
+	}
 })(Vue, window.WindService, window.IosSelect);

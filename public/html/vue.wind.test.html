@@ -50,13 +50,6 @@
             }
         },
         methods: {
-            goPage: function (pageName, isPrompt) {
-                this.curPage = pageName;
-                history.pushState(null, '', "#" + pageName);
-            },
-            historyBack: function(){
-                history.back();
-            },
             onConfirmDemo: function(added, removed) {
                 console.log(added, removed);
                 this.historyBack();
