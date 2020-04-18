@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="user-scalable=no,initial-scale=1" />
+<title>测试</title>
+<link rel="stylesheet" type="text/css" href="fh_main.css">
+<style>
+</style>
+<script src="vue.js"></script>
+</head>
+<body>
+	<div id="app" v-cloak>
+		 <pageable-list 
+		 v-bind:cur-page="curPage" 
+		 v-bind="listConfig" 
+		 v-bind:ref="listConfig.pageName"
+		 @cancel="toIndex" @confirm="listConfig.onConfirm" >
+		 	
+		 </pageable-list>
+
+		<demo-picker :cur-page="curPage"></demo-picker>
+	</div>
+	<script src="jquery.min.js"></script>
+	<script src="i-jquery.js"></script>
+	<script src="vue.winda.service.js"></script>
+	<script src="vue.winda.js"></script>
+	<script>
+ 		var app = new Vue({
+ 			el: "#app",
+ 			data: {
+ 				curPage: 'demoPicker',
+ 				listConfig: {
+ 					pageName: "nb",
+ 					checkedInit: [],
+ 					itemPreProcess: function(data){data.a = "123"},
+ 					onConfirm: function(added, removed){
+ 						console.log(added, removed);
+ 					}
+ 				}
+ 			},
+ 			methods: {
+ 				toIndex: function(){
+ 					this.curPage = 'index';
+ 				}
+ 			}
+ 		});
+    </script>
+</body>
