@@ -291,6 +291,30 @@
 		}
 		return curHash.substr(1);
 	}
+	function contains(key){
+		if(this instanceof Array){
+			for(var i = 0; i < this.length; i++){
+				var v = this[i];
+				if(key === v){
+					return true;
+				}
+			}
+			return false;
+		}else if(this instanceof Object){
+			return key in this;
+		}
+	}
+	function indexOf(key){
+		if(this instanceof Array){
+			for(var i = 0; i < this.length; i++){
+				var v = this[i];
+				if(key === v){
+					return i;
+				}
+			}
+			return -1;
+		}
+	}
 	Vue.component("SubPage", {
 		props: {
 			curPage: String,
@@ -649,6 +673,12 @@
 			'<pageable-list v-bind="listConfig" :cur-page="curPage">' +
 			'</pageable-list>'
 	});
+	Vue.component("VueApp", {
+		template:
+			'<div>' +
+			'	<slot></slot>'+
+			'</div>'
+	});
 	/**
 	 * v-date-select:datetime="Var"
 	 */
@@ -673,24 +703,47 @@
 	/**
 	 * v-page-hash="curPage"
 	 * 使用这个这个来代理浏览器的hash变化，用了这个指令就不要再手动管理hash了
+	 * 要注意curPage的可能的值不要重复
+	 * hashHistory基于一个约定来进行工作：hashHistory中永远不会有重复的值（插入重复值代表后退），每次插入时要将检查是否有重复值
+	 * replaceState
+	 * pushState
 	 */
 	Vue.directive('PageHash', {
 		bind: function(el, binding, vnode){
+			var hashHistory = [];
 			var lastHash;
 			var defaultPage = vnode.data["default-page"] || "index";
 			var curHash = lastHash = getCurHash(defaultPage);
-			if(curHash){
-				vnode.context[binding.expression] = curHash;
-			}
+			vnode.context[binding.expression] = curHash;
+			hashHistory.push(curHash);
 			// console.log(vnode.context.$watch);
+			var dontWatch = false;
 			vnode.context.$watch(binding.expression, function(newVal, oldVal){
-				console.log("page hash watch :", newVal, oldVal);
+				console.log("page hash watch :", newVal, oldVal, dontWatch);
+				if(dontWatch){
+					dontWatch = false;
+					return;
+				}
+				var historyIndex = indexOf.call(hashHistory, newVal);
+				if(historyIndex >= 0){
+					var backStep = hashHistory.length - (historyIndex + 1);
+					if(backStep > 0){
+						history.go(-backStep);
+					}
+				}else {
+					var hash = "#" + newVal;
+					history.pushState(null, '', hash);
+					hashHistory.push(lastHash = newVal);
+				}
 			});
 			window.onpopstate = function(){
 				var popHash = getCurHash(defaultPage);
 				if(popHash === lastHash){
+					console.log("hash duplicate :", popHash, lastHash);
 					return;
 				}
+				console.log("hash change :", popHash, lastHash);
+				dontWatch = true;
 				vnode.context[binding.expression] = popHash;
 				lastHash = popHash;
 			}

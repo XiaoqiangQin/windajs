@@ -11,20 +11,25 @@
     <script src="vue.js"></script>
 </head>
 <body>
-<div id="app" v-cloak v-page-hash="curPage" :default-page="curPage">
+<vue-app id="app" v-cloak v-page-hash="curPage" :default-page="curPage" :prompt-page="promptPage">
 
     <sub-page :cur-page="curPage" page-name="index">
         <ul class="fh-ul">
-            <li v-date-select:datetime="time">
+            <li v-date-select:datetime="time" :prompt-page="promptPage">
                 <span class="left">申请时间</span>
                 <span class="right">{{time}}</span>
+                <span class="iconfont icon-Right"></span>
+            </li>
+            <li @click="curPage = demoPickerConfig.pageName">
+                <span class="left">选人</span>
+                <span class="right">{{name}}</span>
                 <span class="iconfont icon-Right"></span>
             </li>
         </ul>
     </sub-page>
 
-    <demo-picker :cur-page="curPage"></demo-picker>
-</div>
+    <demo-picker :cur-page="curPage" v-bind="demoPickerConfig"></demo-picker>
+</vue-app>
 <script src="jquery.min.js"></script>
 <script src="i-jquery.js"></script>
 <script src="ios-select/zepto.js"></script>
@@ -36,7 +41,9 @@
         el: "#app",
         data: {
             curPage: 'index',
+            promptPage: '',
             time: '',
+            name: '',
             listConfig: {
                 checkedInit: [],
                 itemPreProcess: function (data) {
