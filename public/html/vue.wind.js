@@ -1,6 +1,6 @@
 /*半成品的列表控件*/
 (function(Vue, WindService, IosSelect){
-	var FastIosSelect = window.FastIosSelect = {};
+	var FastIosSelect = window.__FastIosSelect = {};
 	var dateGen = {
 		isLeapYear: function (year) {
 			if(year%400 === 0 || (year%4 === 0 && year%100 !== 0) ) {
@@ -110,7 +110,10 @@
 			return arr;
 		},
 		fixZero: function(callbackValue, len){
-			var id = callbackValue && callbackValue.id;
+			var id = callbackValue;
+			if(typeof callbackValue === "object"){
+				id = callbackValue && callbackValue.id;
+			}
 			if(id === undefined || id === null){
 				return null;
 			}
@@ -120,6 +123,27 @@
 				id = "0" + id;
 			}
 			return id;
+		},
+		/**
+		 * 获取当前时间
+		 * @param isTime true:只返回时间部分，false：只返回日期部分，不传则返回全部
+		 * @returns {string} 格式：YYYY-MM-DD HH:mm:ss
+		 */
+		now: function(isTime){
+			var now = new Date();
+			var ymd = [now.getFullYear(), this.fixZero(now.getMonth() + 1, 2), this.fixZero(now.getDate(), 2)];
+			var hms = [this.fixZero(now.getHours(), 2), this.fixZero(now.getMinutes() + 1, 2), this.fixZero(now.getSeconds(), 2)];
+			var value = "";
+			if(!isTime){
+				value += ymd.join("-");
+			}
+			if(isTime === undefined || isTime === null){
+				value += " ";
+			}
+			if(isTime !== false){
+				value += hms.join(":");
+			}
+			return value;
 		}
 	}
 
@@ -132,7 +156,7 @@
 		 */
 		FastIosSelect.date = function(defaultValue, callback){
 			if(!defaultValue){
-				defaultValue = "1996-01-01";
+				defaultValue = "1996-10-08";
 			}
 			var isTime = defaultValue.indexOf("-") < 0;
 			var selectedSlices = defaultValue.replace(/[-|:|\s]/g, "/").split("/");
@@ -177,7 +201,7 @@
 				var levelName = levelNames[i];
 				options[levelName + "LevelId"] = parseInt(selectedSlices[i]);
 			}
-			new IosSelect(level, data, options);
+			return new IosSelect(level, data, options);
 		}
 	}
 
@@ -592,5 +616,23 @@
 		template:
 			'<pageable-list v-bind="listConfig" :cur-page="curPage">' +
 			'</pageable-list>'
-	})
+	});
+	Vue.directive('dateSelect', {
+		bind: function(el, binding, vnode){
+			el.addEventListener('click',function(){
+				var type = binding.arg || "date";
+				var defaultValue;
+				if(type === "datetime"){
+					defaultValue = dateGen.now();
+				}else if(type === "date"){
+					defaultValue = dateGen.now(false);
+				}else{
+					defaultValue = dateGen.now(true);
+				}
+				FastIosSelect.date(vnode.context[binding.expression] || defaultValue, function(v){
+					vnode.context[binding.expression] = v;
+				});
+			})
+		}
+	});
 })(Vue, window.WindService, window.IosSelect);

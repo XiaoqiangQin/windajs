@@ -15,9 +15,9 @@
 
     <sub-page :cur-page="curPage" page-name="index">
         <ul class="fh-ul">
-            <li @click="curPage='demoPicker'">
+            <li v-date-select:datetime="time">
                 <span class="left">申请时间</span>
-                <span class="right">123</span>
+                <span class="right">{{time}}</span>
                 <span class="iconfont icon-Right"></span>
             </li>
         </ul>
@@ -36,6 +36,7 @@
         el: "#app",
         data: {
             curPage: 'index',
+            time: '',
             listConfig: {
                 checkedInit: [],
                 itemPreProcess: function (data) {
