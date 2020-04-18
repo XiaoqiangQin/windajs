@@ -154,7 +154,7 @@
 		 * @param defaultValue, 初始化的值，格式：YYYY-MM-dd HH:mm:ss，默认为当前时间
 		 * @param callback
 		 */
-		FastIosSelect.date = function(defaultValue, callback){
+		FastIosSelect.date = function(defaultValue, callback, cancelCallback){
 			if(!defaultValue){
 				defaultValue = "1996-10-08";
 			}
@@ -170,6 +170,8 @@
 				title: "选择",
 				itemHeight: 35,
 				showLoading: true,
+				fallback: cancelCallback,
+				maskCallback: cancelCallback,
 				callback: function(v1, v2, v3, v4, v5, v6){
 					var v = "";
 					var base = [v1, v2, v3];
@@ -683,10 +685,12 @@
 	 */
 	Vue.directive('DateSelect', {
 		bind: function(el, binding, vnode){
-			console.log(vnode.context);
+			var _this = vnode.context;
+			var pageName = vnode.data.attrs['page-name'];
+			console.log(_this);
 			el.addEventListener('click',function(){
-				if(vnode.context.goPage){
-					// vnode.context.goPage(123, true);
+				if(_this.goPage){
+					_this.goPage(pageName, true);
 				}
 				var type = binding.arg || "date";
 				var defaultValue;
@@ -697,8 +701,11 @@
 				}else{
 					defaultValue = dateGen.now(true);
 				}
-				FastIosSelect.date(vnode.context[binding.expression] || defaultValue, function(v){
-					vnode.context[binding.expression] = v;
+				FastIosSelect.date(_this[binding.expression] || defaultValue, function(v){
+					_this[binding.expression] = v;
+					_this.historyBack();
+				}, function(){
+					_this.historyBack();
 				});
 			})
 		}
