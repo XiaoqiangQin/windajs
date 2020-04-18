@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="user-scalable=no,initial-scale=1"/>
+    <title>测试</title>
+    <link rel="stylesheet" type="text/css" href="ios-select/iosSelect.css">
+    <link rel="stylesheet" type="text/css" href="fh_main.css">
+    <style>
+    </style>
+    <script src="vue.js"></script>
+</head>
+<body>
+<div id="app" v-cloak>
+
+    <sub-page :cur-page="curPage" page-name="index">
+        <ul class="fh-ul">
+            <li @click="curPage='demoPicker'">
+                <span class="left">申请时间</span>
+                <span class="right">123</span>
+                <span class="iconfont icon-Right"></span>
+            </li>
+        </ul>
+    </sub-page>
+
+    <demo-picker :cur-page="curPage"></demo-picker>
+</div>
+<script src="jquery.min.js"></script>
+<script src="i-jquery.js"></script>
+<script src="vue.wind.service.js"></script>
+<script src="vue.wind.js"></script>
+<script>
+    var app = new Vue({
+        el: "#app",
+        data: {
+            curPage: 'index',
+            listConfig: {
+                checkedInit: [],
+                itemPreProcess: function (data) {
+                    data.a = "123"
+                },
+                onConfirm: function (added, removed) {
+                    console.log(added, removed);
+                }
+            }
+        },
+        methods: {
+            toIndex: function () {
+                this.curPage = 'index';
+            }
+        }
+    });
+</script>
+</body>

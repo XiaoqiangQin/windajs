@@ -55,6 +55,16 @@
 			}
 		}
 	}
+	Vue.component("SubPage", {
+		props: {
+			curPage: String,
+			pageName: String,
+		},
+		template:
+			'<div v-show="curPage == pageName" :page-name="pageName">' +
+			'	<slot></slot>' +
+			'</div>'
+	});
 	Vue.component("PageableList", {
 		props: {
 			curPage: String,
@@ -332,7 +342,7 @@
 			}, 300)
 		},
 		template:
-				'<div v-show="curPage == pageName" :page-name="pageName">'+
+				'<sub-page :cur-page="curPage" :page-name="pageName">'+
 				'	<slot name="search" v-bind:setSearch="setSearch">'+
 				'		<div class="search" style="position: fixed;">'+
 				'			<span class="icon">☌</span><input v-on:input="search()" v-model="query[searchKey]"  v-bind:placeholder="searchPlaceholder">'+
@@ -340,7 +350,7 @@
 				'	</slot>'+
 				
 				'	<slot name="list" v-bind:data="data" v-bind:check="check">'+
-				'		<div class="" @scroll="onScroll" style="overflow-y: auto; position: fixed; top: 0; right: 0; bottom: 0; left: 0;" :style="listContainerStyle">'+
+				'		<div class="" @scroll="onScroll" style="overflow-y: auto; position: absolute; top: 0; right: 0; bottom: 0; left: 0;" :style="listContainerStyle">'+
 				'			<ul class="search-li">'+
 				'				<li v-for="(item, index) in data" v-bind:class="{checked: item[checkedKey]}" v-on:click="check(item)" v-bind:key="item.id" v-show="!item[hideKey]">'+
 				'					<span class="icon"><span></span></span>'+
@@ -354,7 +364,7 @@
 				'		<div class="fixed-btn" @click="cancel">取消 </div>'+	
 				'		<div class="fixed-btn" @click="confirm">确定</div>'+
 				'	</div> '+
-				'</div>',
+				'</sub-page>',
 		watch: {
 			'$data.$_loading': function(){
 				console.log(this.pageName + " is loading: " + this.$data.$_loading);

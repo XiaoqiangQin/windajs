@@ -20,7 +20,7 @@ var WindService = {
 			function mock(query, callback){
 				console.log("Mock...");
 				var data = [];
-				if(query.pageNumber < 2){
+				if(query.pageNumber < 3){
 					for(var count = 0; count < query.pageSize; count++){
 						var id = 1 + count + (query.pageNumber - 1) * query.pageSize;
 						data.push({id: id, name: "项目" + id, sn: "SN_0000" + id});
