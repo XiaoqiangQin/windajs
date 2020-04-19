@@ -17,16 +17,32 @@ var WindService = {
 			WindService.$_get('getFool', query, callback);
 		},
 		getFool: (function(){
+			var data = [];
+
+			for(var count = 0; count < 98; count++){
+				var id = 1 + count;
+				data.push({id: id, name: "项目" + id, sn: "SN_0000" + id});
+			}
+
+			function filter(search){
+				return iUtils.filter(data, function(item){
+					return item.sn.indexOf(search) < 0;
+				});
+			}
+
 			function mock(query, callback){
 				console.log("Mock...");
-				var data = [];
-				if(query.pageNumber < 3){
-					for(var count = 0; count < query.pageSize; count++){
-						var id = 1 + count + (query.pageNumber - 1) * query.pageSize;
-						data.push({id: id, name: "项目" + id, sn: "SN_0000" + id});
+				var result = [];
+				var start = (query.pageNumber - 1) * query.pageSize;
+				var filedData = filter(query.search);
+				for(var i = start; i < filedData.length; i++){
+					if(result.length >= query.pageSize){
+						break;
 					}
+					result.push(filedData[i]);
 				}
-				callback({code: 0, data: data});
+
+				callback({code: 0, data: result});
 			}
 			return function(query, callback){
 				setTimeout(mock.bind(undefined, query, callback), 200);

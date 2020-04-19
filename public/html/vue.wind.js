@@ -706,7 +706,7 @@
 				'		<div class="" @scroll="onScroll" style="overflow-y: auto; position: absolute; top: 0; right: 0; bottom: 0; left: 0;" :style="listContainerStyle">'+
 				'			<ul class="search-li" v-bind:class="ulClass">'+
 				'				<li v-for="(item, index) in data" v-bind:class="{checked: item[checkedKey]}" v-on:click="check(item)" v-bind:key="item.id" v-show="!item[hideKey]">'+
-				'					<slot v-bind:item="item" v-bind:valueKey="valueKey">'+
+				'					<slot name="item-content-wrapper" v-bind:item="item" v-bind:valueKey="valueKey">'+
 				'						<div class="li-content-wrapper">'+
 				'							<span class="icon"><span></span></span>'+
 				'							<div class="li-content"><span v-html="item[valueKey]"></span></div>'+
@@ -785,27 +785,45 @@
 		mixins: [Mixin],
 		props: {
 			curPage: String,
-			pageName: String
+			pageName: String,
+			searchPlaceholder: {
+				type: String,
+				default: "输入名称/编号进行查询",
+			}
 		},
 		data: function(){
 			return {
+				search: '',
+				justDeviceRelated: false,
 				listConfig: {
 					pageName: this.pageName || "demoPicker",
 					getData: WindService.getFool,
 					isList: true,
 					valueKey: "name",
 					queryInit: {pageNumber: 1, pageSize: 50},
-					listContainerStyle: {top: "60px", bottom: "60px"},
+					listContainerStyle: {top: (60 + 40) + "px", bottom: "60px"},
 					ulClass: {'search-li-dl': true},
 				}
 			}
 		},
 		methods: {
-
+			onlyShowRelation: function(){
+				console.log("onlyShowRelation");
+			}
 		},
 		template:
 			'<pageable-list v-bind="listConfig" :cur-page="curPage" @cancel="throwCancel" @confirm="throwConfirm">' +
-			'	<template v-slot:default="props">' +
+			'	<template v-slot:search="props">' +
+			'		<div class="search" style="position: fixed;">'+
+			'			<span class="icon">☌</span><input v-on:input="props.setSearch(search)" v-model="search"  v-bind:placeholder="searchPlaceholder">'+
+			'		</div>'+
+			'		<div style="position:fixed;top:56px;line-height:36px;width:100%;height:36px;padding:0px 13px;background:#f2f5fa;">' +
+			'			<label>只显示关联备件{{justDeviceRelated}}：</label>'+
+
+			'			<yn-switch v-model="justDeviceRelated" @input="onlyShowRelation"></yn-switch>'+
+			'       </div>'+
+			'	</template>' +
+			'	<template v-slot:item-content-wrapper="props">' +
 			'		<span class="icon" style="margin-top:40px;"><span></span></span>'+
 			'		<dl class="list-dl">'+
 			'			<dt>'+
