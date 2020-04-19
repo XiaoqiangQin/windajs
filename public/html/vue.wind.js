@@ -688,6 +688,12 @@
 			var _this = vnode.context;
 			var pageName = vnode.data.attrs['page-name'];
 			console.log(_this);
+			var iosSelect;
+			window.addEventListener('prompt:exit', function(){
+				if(iosSelect){
+					iosSelect.iosSelectLayer.close();
+				}
+			});
 			el.addEventListener('click',function(){
 				if(_this.goPage){
 					_this.goPage(pageName, true);
@@ -701,7 +707,7 @@
 				}else{
 					defaultValue = dateGen.now(true);
 				}
-				FastIosSelect.date(_this[binding.expression] || defaultValue, function(v){
+				iosSelect = FastIosSelect.date(_this[binding.expression] || defaultValue, function(v){
 					_this[binding.expression] = v;
 					_this.historyBack();
 				}, function(){
@@ -726,7 +732,12 @@
 			'</div>',
 		created: function(){
 			var _this = this;
+			var lastIsPrompt = false;
 			function onPopHash(){
+				console.log("last prompt :", lastIsPrompt);
+				if(lastIsPrompt){
+					window.dispatchEvent(new Event("prompt:exit"));
+				}
 				var popHash = getCurHash(_this.defaultPage);
 				var curPage;
 				if(popHash.indexOf("/") > 0){
@@ -734,7 +745,7 @@
 					curPage = slices[0];
 					var promptPageName = slices[1];
 					// _this.$el.$emit("pop:prompt", promptPageName);
-					_this.$el.dispatchEvent(new Event("pop:prompt"));
+					_this.$el.dispatchEvent(new Event("prompt:pop"));
 				}else {
 					curPage = popHash;
 				}
@@ -750,6 +761,7 @@
 				var hash;
 				if(isPrompt){
 					hash = this.curPage + "/" + pageName;
+					lastIsPrompt = true;
 				}else{
 					_this.$emit("change", pageName);
 					hash = pageName;
@@ -768,7 +780,7 @@
 	Vue.directive("back-pop-prompt", {
 		bind: function(el, binding, vnode){
 			var _this = vnode.context;
-			el.addEventListener("pop:prompt", function(){
+			el.addEventListener("prompt:pop", function(){
 				_this.historyBack();
 			});
 		}
