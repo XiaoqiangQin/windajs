@@ -51,7 +51,8 @@
             yn: '',
 
             demoPickerConfig: {
-                pageName: "dio"
+                pageName: "dio",
+                base: void(0),
             }
         },
         methods: {
@@ -59,6 +60,12 @@
                 console.log(added, removed);
                 this.historyBack();
             }
+        },
+        created: function(){
+            var _this = this;
+            setTimeout(function(){
+                _this.demoPickerConfig.base = Math.max(1, parseInt(Math.random() * 10));
+            }, 5000);
         }
     });
 </script>

@@ -24,17 +24,24 @@ var WindService = {
 				data.push({id: id, name: "项目" + id, sn: "SN_0000" + id});
 			}
 
-			function filter(search){
+			function filter(search, base){
 				return iUtils.filter(data, function(item){
-					return item.sn.indexOf(search) < 0;
+					var f = false;
+					if(search){
+						f |= (item.sn.indexOf(search) < 0 && item.name.indexOf(search) < 0);
+					}
+					if(base){
+						f |= item.id % base !== 0;
+					}
+					return f;
 				});
 			}
 
 			function mock(query, callback){
-				console.log("Mock...");
+				console.log("Mock...", query);
 				var result = [];
 				var start = (query.pageNumber - 1) * query.pageSize;
-				var filedData = filter(query.search);
+				var filedData = filter(query.search, query.base);
 				for(var i = start; i < filedData.length; i++){
 					if(result.length >= query.pageSize){
 						break;

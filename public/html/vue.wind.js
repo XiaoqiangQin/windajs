@@ -212,7 +212,7 @@
 							v += " " + hms.join(":");
 						}
 					}
-					console.log(v);
+					// console.log(v);
 					callback(v);
 				}
 			};
@@ -682,7 +682,7 @@
 				this.debounceOnScroll(this, event);
 			},
 			debounceOnScroll: debounce(function(event){
-				console.log(this, event);
+				// console.log(this, event);
 
 				var isReach = isReachEdge(event, 'down');
 				if (isReach) {
@@ -789,6 +789,9 @@
 			searchPlaceholder: {
 				type: String,
 				default: "输入名称/编号进行查询",
+			},
+			base: {
+				type: Number,
 			}
 		},
 		data: function(){
@@ -803,12 +806,19 @@
 					queryInit: {pageNumber: 1, pageSize: 50},
 					listContainerStyle: {top: (60 + 40) + "px", bottom: "60px"},
 					ulClass: {'search-li-dl': true},
+					execLoad: 1,
 				}
 			}
 		},
 		methods: {
 			onlyShowRelation: function(){
 				console.log("onlyShowRelation");
+				if(this.justDeviceRelated){
+					this.listConfig.queryInit.base = this.base;
+				}else {
+					this.listConfig.queryInit.base = void(0);
+				}
+				this.listConfig.execLoad++;
 			}
 		},
 		template:
@@ -818,7 +828,7 @@
 			'			<span class="icon">☌</span><input v-on:input="props.setSearch(search)" v-model="search"  v-bind:placeholder="searchPlaceholder">'+
 			'		</div>'+
 			'		<div style="position:fixed;top:56px;line-height:36px;width:100%;height:36px;padding:0px 13px;background:#f2f5fa;">' +
-			'			<label>只显示关联备件{{justDeviceRelated}}：</label>'+
+			'			<label>只显示关联备件{{justDeviceRelated}}{{base}}：</label>'+
 
 			'			<yn-switch v-model="justDeviceRelated" @input="onlyShowRelation"></yn-switch>'+
 			'       </div>'+
@@ -854,7 +864,7 @@
 			var _this = vnode.context;
 			var type = binding.arg || "date";
 			var pageName = vnode.data.attrs['page-name'];
-			console.log(_this);
+			// console.log(_this);
 			if(binding.modifiers.now){
 				if(!_this[binding.expression]){
 					_this[binding.expression] = dateGen.now(type);
