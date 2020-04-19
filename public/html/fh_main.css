@@ -718,11 +718,15 @@ attachment:after, .attachment:after{
     vertical-align:middle;
     margin-top:15px;
 }
-.search-li li>div{
+.search-li li .li-content-wrapper{
+	display: flex;
+	flex: 1;
+}
+.search-li li>div:not(.li-content-wrapper), .search-li li .li-content{
 	flex:1;
 	padding:15px 10px;
 }
-.search-li li+li>div{
+.search-li li+li>div:not(.li-content-wrapper), .search-li li+li .li-content{
 	border-top:0.01em solid #cacde2;
 }
 .search-li li .icon span{

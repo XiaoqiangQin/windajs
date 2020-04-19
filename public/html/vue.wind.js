@@ -388,6 +388,16 @@
 			'	<slot></slot>' +
 			'</div>'
 	});
+	var Mixin = {
+		methods: {
+			throwConfirm: function(arg1, arg2, arg3, arg4){
+				this.$emit("confirm", arg1, arg2, arg3, arg4);
+			},
+			throwCancel: function(){
+				this.$emit("cancel");
+			}
+		}
+	}
 	/**
 	 * 通用列表页
 	 */
@@ -482,6 +492,9 @@
 			execLoad: {
 				type: Number,
 				default: 1
+			},
+			ulClass: {
+				type: Object,
 			}
 		},
 		data: function(){
@@ -677,10 +690,14 @@
 				
 				'	<slot name="list" v-bind:data="data" v-bind:check="check">'+
 				'		<div class="" @scroll="onScroll" style="overflow-y: auto; position: absolute; top: 0; right: 0; bottom: 0; left: 0;" :style="listContainerStyle">'+
-				'			<ul class="search-li">'+
+				'			<ul class="search-li" v-bind:class="ulClass">'+
 				'				<li v-for="(item, index) in data" v-bind:class="{checked: item[checkedKey]}" v-on:click="check(item)" v-bind:key="item.id" v-show="!item[hideKey]">'+
-				'					<span class="icon"><span></span></span>'+
-				'					<div><span v-html="item[valueKey]"></span></div>'+
+				'					<slot v-bind:item="item" v-bind:valueKey="valueKey">'+
+				'						<div class="li-content-wrapper">'+
+				'							<span class="icon"><span></span></span>'+
+				'							<div class="li-content"><span v-html="item[valueKey]"></span></div>'+
+				'						</div>'+
+				'					</slot>'+
 				'				</li>'+
 				'			</ul>'+
 				'		</div>'+
@@ -719,9 +736,39 @@
 		}
 	});
 	/**
-	 * @PageableList 拓展示例
+	 * 树形选择器
+	 */
+	// Vue.component("TreePicker", {
+	// 	props: {
+	//
+	// 		valueKey: {
+	// 			type: String,
+	// 			default: 'value'
+	// 		},
+	// 	},
+	// 	data: function(){
+	// 		return {};
+	// 	},
+	// 	template:
+	// 		'<div>' +
+	// 		'	<ul class="search-li" v-for="(li, index) in list">'+
+	// 		'		<li v-bind:class="{\'checked\': li.checked}" v-on:click="check(li)">'+
+	// 		'			<div>'+
+	// 		'				<span class="icon"><span></span></span>'+
+	// 		'				<div class="border-bottom"><span v-html="li[valueKey]"></span></div>'+
+	// 		'			</div>'+
+	// 		'			<div v-if="li.children && li.children.length" style="padding-left: 24px;">'+
+	// 		'				<tree-picker v-bind:config.showSearch="false" v-bind:config="config" v-bind:list="listData" v-bind:tree="u.children"></tree-picker>'+
+	// 		'			</div>'+
+	// 		'		</li>'+
+	// 		'	</ul>'+
+	// 		'</div>',
+	// });
+	/**
+	 * @PageableList 拓展示例，实际使用过程中进行拓展应该新开一个文件，不然不好维护
 	 */
 	Vue.component("DemoPicker", {
+		mixins: [Mixin],
 		props: {
 			curPage: String,
 			pageName: String
@@ -735,16 +782,35 @@
 					valueKey: "name",
 					queryInit: {pageNumber: 1, pageSize: 50},
 					listContainerStyle: {top: "60px", bottom: "60px"},
+					ulClass: {'search-li-dl': true},
 				}
 			}
 		},
 		methods: {
-			onConfirm: function(added, removed){
-				this.$emit("confirm", added, removed);
-			}
+
 		},
 		template:
-			'<pageable-list v-bind="listConfig" :cur-page="curPage" @cancel="$emit(\'cancel\')" @confirm="onConfirm">' +
+			'<pageable-list v-bind="listConfig" :cur-page="curPage" @cancel="throwCancel" @confirm="throwConfirm">' +
+			'	<template v-slot:default="props">' +
+			'		<span class="icon" style="margin-top:40px;"><span></span></span>'+
+			'		<dl class="list-dl">'+
+			'			<dt>'+
+			'				<span>设备编号：</span><span v-html="props.item.sn"></span>'+
+			'			</dt>'+
+			'			<dd>'+
+			'				<span>设备名称：</span><span v-html="props.item.name"></span>'+
+			'			</dd>'+
+			'			<dd>'+
+			'				<span>所属部门：</span><span v-html="props.item.departname"></span>'+
+			'			</dd>'+
+			'			<dd>'+
+			'				<span>负  责  人：</span><span v-html="props.item.nickname"></span>'+
+			'			</dd>'+
+			'			<dd>'+
+			'				<span>存放位置：</span><span v-html="props.item.location_idvalue"></span>'+
+			'			</dd>'+
+			'		</dl>'+
+			'	</template>'+
 			'</pageable-list>'
 	});
 	/**
