@@ -11,7 +11,7 @@
     <script src="vue.js"></script>
 </head>
 <body>
-<vue-app id="app" v-cloak v-model="curPage">
+<vue-app id="app" v-cloak v-model="curPage" v-back-pop-prompt>
 
     <sub-page :cur-page="curPage" page-name="index">
         <ul class="fh-ul">

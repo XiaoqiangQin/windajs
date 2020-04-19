@@ -721,24 +721,56 @@
 			}
 		},
 		template:
-			'<div >' +
+			'<div>' +
 			'	<slot></slot>'+
 			'</div>',
 		created: function(){
 			var _this = this;
-			var popHash;
-			popHash = getCurHash(_this.defaultPage);
-			_this.$emit("change", popHash);
-			Vue.prototype.goPage = function (pageName, isPrompt) {
-				if(!isPrompt){
-					_this.$emit("change", pageName);
+			function onPopHash(){
+				var popHash = getCurHash(_this.defaultPage);
+				var curPage;
+				if(popHash.indexOf("/") > 0){
+					var slices = popHash.split("/");
+					curPage = slices[0];
+					var promptPageName = slices[1];
+					// _this.$el.$emit("pop:prompt", promptPageName);
+					_this.$el.dispatchEvent(new Event("pop:prompt"));
+				}else {
+					curPage = popHash;
 				}
-				history.pushState(null, '', "#" + pageName);
+				_this.$emit("change", curPage);
 			}
-			window.onpopstate = function(){
-				popHash = getCurHash(_this.defaultPage);
-				_this.$emit("change", popHash);
+			setTimeout(onPopHash, 1);
+			/**
+			 * 切换显示页，通知更新curPage，设置页面hash
+			 * @param pageName 要显示的页面的名称
+			 * @param isPrompt 是否时弹出框，如果是，则不更新curPage，并且hash=curPage/promptPageName
+			 */
+			Vue.prototype.goPage = function (pageName, isPrompt) {
+				var hash;
+				if(isPrompt){
+					hash = this.curPage + "/" + pageName;
+				}else{
+					_this.$emit("change", pageName);
+					hash = pageName;
+				}
+				history.pushState(null, '', "#" + hash);
 			}
+			/**
+			 * 前进，后退事件。
+			 * 将通知更新curPage，如果hash中包含“/”就要处理是弹出框的情况：
+			 * 先将hash分割成[curPage, pageName]
+			 */
+			window.onpopstate = onPopHash;
+		}
+	});
+
+	Vue.directive("back-pop-prompt", {
+		bind: function(el, binding, vnode){
+			var _this = vnode.context;
+			el.addEventListener("pop:prompt", function(){
+				_this.historyBack();
+			});
 		}
 	});
 
@@ -746,4 +778,7 @@
 	Vue.prototype.historyBack = function(){
 		history.back();
 	}
+	Vue.prototype.log = function(text){
+		console.log(text);
+	};
 })(Vue, window.WindService, window.IosSelect);
