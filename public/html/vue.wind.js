@@ -134,17 +134,29 @@
 		 * @returns {string} 格式：YYYY-MM-DD HH:mm:ss
 		 */
 		now: function(isTime){
+			var type;
+			if(typeof isTime === "string"){
+				type = isTime;
+			}else {
+				if(isTime === true){
+					type = "time";
+				}else if(isTime === false){
+					type = "date";
+				}else{
+					type = "datetime";
+				}
+			}
 			var now = new Date();
 			var ymd = [now.getFullYear(), this.fixZero(now.getMonth() + 1, 2), this.fixZero(now.getDate(), 2)];
 			var hms = [this.fixZero(now.getHours(), 2), this.fixZero(now.getMinutes() + 1, 2), this.fixZero(now.getSeconds(), 2)];
 			var value = "";
-			if(!isTime){
+			if(type === "date" || type === "datetime"){
 				value += ymd.join("-");
 			}
-			if(isTime === undefined || isTime === null){
+			if(type === "datetime"){
 				value += " ";
 			}
-			if(isTime !== false){
+			if(type === "time" || type === "datetime"){
 				value += hms.join(":");
 			}
 			return value;
@@ -534,7 +546,9 @@
 				this.query.pageNumber = pageNumber;
 			},
 			resetQuery: function(){
-				this.query = $.extend({}, this.queryInit);
+				var query = {};
+				query[this.searchKey] = this.query[this.searchKey] || "";
+				this.query = $.extend(query, this.queryInit);
 			},
 			load: function(loadMore){
 				var _this = this;
@@ -820,8 +834,14 @@
 	Vue.directive('DateSelect', {
 		bind: function(el, binding, vnode){
 			var _this = vnode.context;
+			var type = binding.arg || "date";
 			var pageName = vnode.data.attrs['page-name'];
 			console.log(_this);
+			if(binding.modifiers.now){
+				if(!_this[binding.expression]){
+					_this[binding.expression] = dateGen.now(type);
+				}
+			}
 			var iosSelect;
 			window.addEventListener('prompt:exit', function(){
 				if(iosSelect){
@@ -832,15 +852,7 @@
 				if(_this.goPage){
 					_this.goPage(pageName, true);
 				}
-				var type = binding.arg || "date";
-				var defaultValue;
-				if(type === "datetime"){
-					defaultValue = dateGen.now();
-				}else if(type === "date"){
-					defaultValue = dateGen.now(false);
-				}else{
-					defaultValue = dateGen.now(true);
-				}
+				var defaultValue = dateGen.now(type);
 				iosSelect = FastIosSelect.date(_this[binding.expression] || defaultValue, function(v){
 					_this[binding.expression] = v;
 					_this.historyBack();
