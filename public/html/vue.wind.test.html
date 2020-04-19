@@ -25,6 +25,11 @@
                 <span class="right">{{name}}</span>
                 <span class="iconfont icon-Right"></span>
             </li>
+            <li>
+                <span class="left">是否</span>
+                <span class="right">{{yn}}</span>
+                <yn-switch v-model="yn"></yn-switch>
+            </li>
         </ul>
     </sub-page>
 
@@ -43,6 +48,7 @@
             curPage: '',
             time: '',
             name: '',
+            yn: '',
 
             demoPickerConfig: {
                 pageName: "dio"

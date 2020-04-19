@@ -716,6 +716,9 @@
 			})
 		}
 	});
+	/**
+	 * app元素，路由
+	 */
 	Vue.component("VueApp", {
 		model: {prop: "curPage", event: "change"},
 		props: {
@@ -786,6 +789,53 @@
 		}
 	});
 
+	Vue.component('YnSwitch', {
+		props: {
+			value: [String, Number, Boolean],
+			disabled: {
+				type: Boolean,
+				default: false,
+			},
+			type: {
+				type: String,
+			}
+		},
+		data: function(){
+			return {
+			}
+		},
+		methods: {
+			change: function(){
+				if (this.disabled) {
+					return;
+				}
+				var type = this.type;
+				var v = this.value;
+				if(!type){
+					if(typeof v === "number"){
+						type = "number";
+					}else if(typeof v === "string"){
+						type = "string";
+					}else {
+						type = "boolean";
+					}
+				}
+				if(type === "number"){
+					v = 1 & (!v);
+				}else if(type === "string"){
+					v = !v? "1": "";
+				}else {
+					v = !v;
+				}
+				this.$emit('input', v);
+			}
+		},
+		template:
+			'<div class="Switch Switch_Flat" v-bind:class="{On: !!value}" v-on:click="change">'
+			+ '	<div class="SwitchLine"></div>'
+			+ '	<span class="SwitchButton"></span>'
+			+ '</div>'
+	});
 
 	Vue.prototype.historyBack = function(){
 		history.back();
