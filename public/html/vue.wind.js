@@ -1,6 +1,10 @@
 /*半成品的列表控件*/
 (function(Vue, WindService, IosSelect){
 	var FastIosSelect = window.__FastIosSelect = {};
+	/**
+	 * 时间相关的操作
+	 * @type {{fixZero: fixZero, Month: (function(*, *): []), Year: (function(*): []), Minute: (function(): []), Second: (function(): []), Hour: (function(): []), now: (function(*=): string), isLeapYear: isLeapYear, Date: (function(): [])}}
+	 */
 	var dateGen = {
 		isLeapYear: function (year) {
 			if(year%400 === 0 || (year%4 === 0 && year%100 !== 0) ) {
@@ -153,6 +157,7 @@
 		 * 选择时间
 		 * @param defaultValue, 初始化的值，格式：YYYY-MM-dd HH:mm:ss，默认为当前时间
 		 * @param callback
+		 * @param cancelCallback 取消（取消按钮或点击确定）
 		 */
 		FastIosSelect.date = function(defaultValue, callback, cancelCallback){
 			if(!defaultValue){
@@ -207,6 +212,12 @@
 		}
 	}
 
+	/**
+	 * 根据元素获取eventTarget
+	 * @param element
+	 * @param rootParent
+	 * @returns {parentNode|(() => (Node | null))|ActiveX.IXMLDOMNode|(Node & ParentNode)|Window}
+	 */
 	function getScrollEventTarget(element, rootParent) {
 		if(!rootParent){rootParent = window}
 		let currentNode = element;
@@ -220,6 +231,14 @@
 		return rootParent;
 	}
 
+	/**
+	 * 是否到达顶部/底部
+	 * @param event dom事件
+	 * @param direction
+	 * @param offset
+	 * @param placeholder
+	 * @returns {boolean}
+	 */
 	function isReachEdge(event, direction, offset, placeholder){
 		if(offset === undefined){offset=0}
 
@@ -240,6 +259,12 @@
 	}
 
 
+	/**
+	 * 防抖动
+	 * @param task 真实执行的函数
+	 * @param time 推迟时间，task在该时间内再次触发则会再顺延一个time的时长
+	 * @returns {function(...[*]=)}
+	 */
 	function debounce(task, time){
 		var timer = null;
 		return function(){
@@ -249,6 +274,13 @@
 			timer = setTimeout(task.bind(arguments[0], arguments[1]), time);
 		}
 	}
+
+	/**
+	 * 节流
+	 * @param task 真实执行的函数
+	 * @param time 任务执行间隔，任务间隔中的任务将不执行
+	 * @returns {function(...[*]=)}
+	 */
 	function throttle(task, time){
 		var valid = true;
 		return function(){
@@ -261,6 +293,12 @@
 			}
 		}
 	}
+
+	/**
+	 * 多层级获取值 obj['l1.l2.l3'] = obj.l1.l2.l3
+	 * @param path
+	 * @returns {getByPath}
+	 */
 	function getByPath(path){
 		var  dir = path.split(".");
 		var v = this;
@@ -270,6 +308,13 @@
 		}
 		return v;
 	}
+
+	/**
+	 * 多层级设置值 obj['l1.l2.l3'] = obj.l1.l2.l3
+	 * @param path
+	 * @param value
+	 * @returns {*}
+	 */
 	function setByPath(path, value){
 		var obj = this;
 		var  dir = path.split(".");
@@ -293,6 +338,12 @@
 		}
 		return curHash.substr(1);
 	}
+
+	/**
+	 * 是否存在指定元素，应用于对象上时指key
+	 * @param key
+	 * @returns {boolean}
+	 */
 	function contains(key){
 		if(this instanceof Array){
 			for(var i = 0; i < this.length; i++){
@@ -306,6 +357,12 @@
 			return key in this;
 		}
 	}
+
+	/**
+	 * 获取元素所在索引，如果不存在，则返回-1
+	 * @param key
+	 * @returns {number}
+	 */
 	function indexOf(key){
 		if(this instanceof Array){
 			for(var i = 0; i < this.length; i++){
@@ -317,6 +374,10 @@
 			return -1;
 		}
 	}
+
+	/**
+	 * 子页面，传入curPage和pageName后自动判断是否显示该页面
+	 */
 	Vue.component("SubPage", {
 		props: {
 			curPage: String,
@@ -327,6 +388,9 @@
 			'	<slot></slot>' +
 			'</div>'
 	});
+	/**
+	 * 通用列表页
+	 */
 	Vue.component("PageableList", {
 		props: {
 			curPage: String,
@@ -654,6 +718,9 @@
 			}
 		}
 	});
+	/**
+	 * @PageableList 拓展示例
+	 */
 	Vue.component("DemoPicker", {
 		props: {
 			curPage: String,
@@ -682,6 +749,7 @@
 	});
 	/**
 	 * v-date-select:datetime="Var"
+	 * 点后退按钮时自动关闭，取消或确定时自动后退。
 	 */
 	Vue.directive('DateSelect', {
 		bind: function(el, binding, vnode){
@@ -780,6 +848,9 @@
 		}
 	});
 
+	/**
+	 * 阻止直接进入或者返回到弹出框页面，不需要参数
+	 */
 	Vue.directive("back-pop-prompt", {
 		bind: function(el, binding, vnode){
 			var _this = vnode.context;
@@ -789,6 +860,9 @@
 		}
 	});
 
+	/**
+	 * 开关，使用v-model
+	 */
 	Vue.component('YnSwitch', {
 		props: {
 			value: [String, Number, Boolean],
