@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="user-scalable=no,initial-scale=1"/>
     <title>测试</title>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.6/lib/index.css"/>
     <link rel="stylesheet" type="text/css" href="ios-select/iosSelect.css">
     <link rel="stylesheet" type="text/css" href="fh_main.css">
     <style>
@@ -35,6 +37,10 @@
 
     <demo-picker :cur-page="curPage" v-bind="demoPickerConfig" @cancel="historyBack" @confirm="onConfirmDemo"></demo-picker>
 </vue-app>
+<!-- 引入 Vue 和 Vant 的 JS 文件 -->
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vant@2.6/lib/vant.min.js"></script>
+
 <script src="jquery.min.js"></script>
 <script src="i-jquery.js"></script>
 <script src="ios-select/zepto.js"></script>
