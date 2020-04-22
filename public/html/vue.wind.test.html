@@ -9,6 +9,20 @@
     <link rel="stylesheet" type="text/css" href="ios-select/iosSelect.css">
     <link rel="stylesheet" type="text/css" href="fh_main.css">
     <style>
+        .preview{
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+
+        }
+        .preview-track{
+        }
+        .preview-file-item{
+            height: 100%;
+            float: left;
+        }
     </style>
     <script src="vue.js"></script>
 </head>
@@ -33,13 +47,13 @@
                 <yn-switch v-model="yn"></yn-switch>
             </li>
         </ul>
+        <preview :file-list="fileList" ref="preview"/>
     </sub-page>
 
     <demo-picker :cur-page="curPage" v-bind="demoPickerConfig" @cancel="historyBack" @confirm="onConfirmDemo"></demo-picker>
 </vue-app>
 <!-- 引入 Vue 和 Vant 的 JS 文件 -->
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vant@2.6/lib/vant.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vant@2.6/lib/vant.js"></script>
 
 <script src="jquery.min.js"></script>
 <script src="i-jquery.js"></script>
@@ -55,10 +69,90 @@
             time: '',
             name: '',
             yn: '',
+            fileList: [
+                {url: "../image/u=1239482979,4262651666&fm=15&gp=0.jpg"},
+                {url: "../image/u=1832578746,1815426777&fm=26&gp=0.jpg"},
+                {url: "../image/u=3014911302,1460118588&fm=26&gp=0.jpg"},
+                {url: "../image/u=3205184732,587777429&fm=15&gp=0.jpg"},
+                {url: "../image/u=4015798817,2981012243&fm=15&gp=0.jpg"},
+                {url: "../image/u=4015965638,621543280&fm=26&gp=0.jpg"}
+            ],
 
             demoPickerConfig: {
                 pageName: "dio",
                 base: void(0),
+            }
+        },
+        components: {
+            'preview': {
+                props: {
+                    fileList: {
+                        type: Array,
+                        default: function(){
+                            return [];
+                        }
+                    }
+                },
+                data: function(){
+                    return {
+                        window: {
+                            width: window.innerWidth,
+                            height: window.innerHeight,
+                        },
+                        translateX: 0,
+                        trackStyle: {
+                            width: window.innerWidth * this.fileList.length + 'px',
+                            height: window.innerHeight + 'px',
+                            transform: 'translateX(0px)',
+                        },
+                        touch: {
+                            startX: '',
+                            startY: '',
+                            endX: '',
+                            endY: '',
+                            lastX: '',
+                            lastY: '',
+                        }
+                    }
+                },
+                watch: {
+                    translateX: function(v){
+                        this.trackStyle.transform = 'translateX('+ v + 'px)';
+                    }
+                },
+                template:
+                    '<div class="preview">' +
+                    '   <div style="position: fixed; bottom: 0; right: 0; z-index: 100000;">{{touch}}</div>'+
+                    '   <div class="preview-track" :style="trackStyle" @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd">' +
+                    '       <div v-for="(file, index) in fileList" class="preview-file-item" :style="{width: window.width + \'px\'}">' +
+                    '           <img :src="file.url"/>' +
+                    '       </div>' +
+                    '   </div>'+
+                    '</div>',
+                methods: {
+                    touchStart: function(event){
+                        var touches = event.touches;
+                        console.log(touches);
+                        var touch = touches[0];
+                        this.touch.startX = touch.screenX;
+                        this.touch.startY = touch.screenY;
+                        this.touch.lastX = touch.screenX;
+                        this.touch.lastY = touch.screenY;
+                    },
+                    touchEnd: function(event){
+                        console.log("release...");
+                    },
+                    touchMove: function(event){
+                        var touches = event.touches;
+                        console.log(touches);
+                        var touch = touches[0];
+                        var x = touch.screenX - this.touch.lastX;
+                        var y = touch.screenY - this.touch.lastY;
+                        this.touch.lastX = touch.screenX;
+                        this.touch.lastY = touch.screenY;
+                        this.translateX += x;
+                    }
+                }
             }
         },
         methods: {
